@@ -88,12 +88,22 @@ next_positions = [];
 is_black = true;
 is_king = true;
 
+n_blacks = 12;
+n_reds = 12;
+
 while true
     
     %drawScene(game, board2disp(board))
     display(2:9, 2:9) = board2disp(board);
     display(5, 11) = red - black_turn;
     drawScene(game, display)
+    if n_reds == 0
+        fprintf('Black Wins!')
+        break
+    elseif n_blacks == 0
+        fprintf('Red Wins!')
+        break
+    end
     
     % Get mouse input
     [selected_row, selected_col] = getMouseInput(game);
@@ -107,13 +117,18 @@ while true
             row = next_positions(i, 1);
             col = next_positions(i, 2);
             if row == selected_row && col == selected_col
-                if (is_black && row == 1) || (~is_black == row == 8)
+                if is_king || (is_black && row == 1) || (~is_black && row == 8)
                     board(row, col) = rk - is_black;
                 else
                     board(row, col) = rr - is_black;
                 end
                 if abs(row - previous_row) == 2
                     board(mean([row, previous_row]), mean([col, previous_col])) = bt;
+                    if is_black
+                        n_reds = n_reds - 1;
+                    else
+                        n_blacks = n_blacks - 1;
+                    end
                 end
                 move_made = true;
             else
@@ -130,9 +145,9 @@ while true
             continue
         else
             if is_king
-                board(previous_row, previous_col) = rr - is_black;
-            else
                 board(previous_row, previous_col) = rk - is_black;
+            else
+                board(previous_row, previous_col) = rr - is_black;
             end
         end
     end
@@ -156,7 +171,7 @@ while true
     % ---Only new, valid piece clicks are processed after here---
 
     % Selection info
-    is_black = (selected == br);
+    is_black = (selected == br) || (selected == bk);
     is_king = (selected == bk) || (selected == rk);
 
     % Possible moves (next positions)
