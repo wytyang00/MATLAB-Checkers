@@ -14,7 +14,7 @@ rt = 2;
 br = 3;
 rr = 4;
 
-bk = 5;
+bk = 5; 
 rk = 6;
 
 bs = 7;
@@ -107,7 +107,11 @@ while true
             row = next_positions(i, 1);
             col = next_positions(i, 2);
             if row == selected_row && col == selected_col
-                board(row, col) = rr - is_black;
+                if (is_black && row == 1) || (~is_black == row == 8)
+                    board(row, col) = rk - is_black;
+                else
+                    board(row, col) = rr - is_black;
+                end
                 if abs(row - previous_row) == 2
                     board(mean([row, previous_row]), mean([col, previous_col])) = bt;
                 end
@@ -125,7 +129,11 @@ while true
             piece_selected = false;
             continue
         else
-            board(previous_row, previous_col) = rr - is_black;
+            if is_king
+                board(previous_row, previous_col) = rr - is_black;
+            else
+                board(previous_row, previous_col) = rk - is_black;
+            end
         end
     end
     
@@ -134,7 +142,8 @@ while true
     else
         selected = -1;
     end
-    if selected ~= rr - black_turn
+    
+    if (selected ~= rr - black_turn) && (selected ~= rk - black_turn)
         previous_row = selected_row;
         previous_col = selected_col;
         next_positions = [];
@@ -148,13 +157,13 @@ while true
 
     % Selection info
     is_black = (selected == br);
-    is_king = false;
+    is_king = (selected == bk) || (selected == rk);
 
     % Possible moves (next positions)
     next_positions = zeros(4, 2);
     idx = 0;
     for row_dir = [-1, 1]
-        if is_king || is_black && row_dir == -1 || ~is_black && row_dir == 1
+        if is_king || (is_black && row_dir == -1) || (~is_black && row_dir == 1)
             for col_dir = [-1, 1]
                 row = selected_row + row_dir;
                 col = selected_col + col_dir;
@@ -162,7 +171,7 @@ while true
                     if board(row, col) == bt
                         idx = idx + 1;
                         next_positions(idx, :) = [row, col];
-                    elseif (is_black && board(row, col) == rr) || (~is_black && board(row, col) == br)
+                    elseif (is_black && board(row, col) == rr) || (is_black && board(row, col) == rk) || (~is_black && board(row, col) == br) || (~is_black && board(row, col) == br)
                         row = row + row_dir;
                         col = col + col_dir;
                         if withinBoard(row, col) && board(row, col) == bt
@@ -176,7 +185,12 @@ while true
     end
     next_positions = next_positions(1:idx, :);
 
-    board(selected_row, selected_col) = rs - is_black;
+    if is_king
+        board(selected_row, selected_col) = rS - is_black;
+    else
+        board(selected_row, selected_col) = rs - is_black;
+    end
+    
     if ~isempty(next_positions)
         for i = 1:size(next_positions, 1)
             row = next_positions(i, 1);
