@@ -6,7 +6,6 @@ function [moveDist] = getMoveDistances(empty, blackKing, black, redKing, red)
     % representing how far the piece can move in each of 4 directions
     % [Up-Left, Up-Right, Down-Left, Down-Right].
     
-    %%
 %     moveDist = zeros(8, 8, 4);
 
 %     upLeft = zeros(8, 8);
@@ -29,7 +28,9 @@ function [moveDist] = getMoveDistances(empty, blackKing, black, redKing, red)
 %     moveDist(:, :, 2) = upRight;
 %     moveDist(:, :, 3) = downLeft;
 %     moveDist(:, :, 4) = downRight;
-    %%
+    
+    % These do the same task as shown above, but this way proved to be faster
+    
     moveDist = zeros(8, 8, 4);
     blackOrRedKing = (black | redKing);
     redOrBlackKing = (red | blackKing);

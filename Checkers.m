@@ -4,11 +4,31 @@ clc
 clear
 close all
 
-% Initialize the game engine.
-scaleFactor = 3;
-bgColor = [255, 255, 255]; % Background color RGB values (0-255)
+scaleFactor = 3; % Scaling factor for the game display
 
-game = simpleGameEngine('checkers_Sprites_Three_Pieces.png', 32, 32, scaleFactor, bgColor);
+% Initialize the menu game engine.
+game = simpleGameEngine('checkersMenu.png', 96, 96, scaleFactor / 3, [255, 255, 255]); % Sprite resolution for the mainmenu is three times the main game sprites.
+
+% Show mainmenu.
+drawScene(game, reshape([1:54], [9, 6])')
+gameFigure = game.my_figure;
+
+% Get play mode choice from the player.
+modeChosen = false;
+while ~modeChosen
+    [clickRow, clickCol] = getMouseInput(game);
+    if clickRow == 5 && clickCol >= 4 && clickCol <= 6
+        againstCpu = false;
+        modeChosen = true;
+    elseif clickRow == 6 && clickCol >= 4 && clickCol <= 6
+        againstCpu = true;
+        modeChosen = true;
+    end
+end
+
+% Initialize the main game engine with the same figure.
+game = simpleGameEngine('checkersSprites.png', 32, 32, scaleFactor, [255, 255, 255]);
+game.my_figure = gameFigure;
 
 % Assign values to pieces and tiles.
 bt = 1; rt = 2;   % Black empty Tile;            Red empty Tile
@@ -36,6 +56,10 @@ ul = 22; % board Upper Left corner sprite index
 ur = 24; % board Upper Right corner sprite index
 ll = 27; % board Lower Left corner sprite index
 lr = 29; % board Lower Right corner sprite index
+
+p1  = 19; % Player 1 sprite index
+p2  = 20; % Player 2 sprite index
+cpu = 21; % CPU(AI) sprite index
 
 % Capture count indicator sprite indices
 oneBlackPiece = 33;
@@ -84,9 +108,12 @@ boardDisplay = [             top;
 % Initialize some variables before the main game loop.
 % Some of the values here are arbitrary as they will be assigned new values
 % before being used.
-againstCpu = true; % TODO: This should be something the player can choose.
-blackTurn = true; % Whether it is black's turn or not (TODO: try random)
-cpuTurn = true;
+blackTurn = true; % Whether it is black's turn or not (black always goes first)
+if againstCpu
+    cpuTurn = randi([0 1]); % Whether it is CPU(AI)'s turn or not (initially chosen randomly)
+else
+    cpuTurn = false;
+end
 
 featureWeights = [1, 2, 0.9, 1.8, -0.2, -0.4, 0.5, 0.2]; % Feature weights used for board evaluation for AI
 depth = 6; % Minimax tree search depth for AI (deeper depth requires longer time)
@@ -128,8 +155,22 @@ while true
     % Update the turn indicator
     if blackTurn
         boardDisplay(5, 11) = bw;
+        if againstCpu && cpuTurn
+            boardDisplay(5, 12) = cpu;
+        else
+            boardDisplay(5, 12) = p1;
+        end     
     else
         boardDisplay(5, 11) = rw;
+        if againstCpu
+            if cpuTurn
+                boardDisplay(5, 12) = cpu;
+            else
+                boardDisplay(5, 12) = p1;
+            end
+        else
+            boardDisplay(5, 12) = p2;
+        end
     end
     
     % Update capture count display
@@ -448,28 +489,28 @@ lose = [17, 18]; % Lose sprite indices
 if blackWin
     if againstCpu
         if cpuTurn == blackTurn
-            winner = [9, 21]; % Winner color and name sprite indices
-            loser  = [10, 19]; % Loser color and name sprite indices
+            winner = [bw, cpu]; % Winner color and name sprite indices
+            loser  = [rw, p1]; % Loser color and name sprite indices
         else
-            winner = [9, 19];
-            loser  = [10, 21];
+            winner = [rw, p1];
+            loser  = [bw, cpu];
         end
     else
-        winner = [9, 19];
-        loser  = [10, 20];
+        winner = [bw, p1];
+        loser  = [rw, p2];
     end
 else
     if againstCpu
         if cpuTurn == blackTurn
-            winner = [10, 19];
-            loser = [9, 21];
+            winner = [rw, p1];
+            loser = [bw, cpu];
         else
-            winner = [10, 21];
-            loser = [9, 19];
+            winner = [rw, cpu];
+            loser = [bw, p1];
         end
     else
-        winner = [10, 20];
-        loser  = [9, 19];
+        winner = [rw, p2];
+        loser  = [bw, p1];
     end
 end
 
