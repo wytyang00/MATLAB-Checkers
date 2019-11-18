@@ -19,7 +19,7 @@ function [value, rowColMove] = checkersAlphabeta(board, bt, rt, bn, rn, bk, rk, 
         end
     elseif depth == 0
         value = evaluateBoard(empty, blackNormal, blackKing, black, ...
-                              redNormal, redKing, red, moveDistances, blackTurn && maximize, featureWeights);
+                              redNormal, redKing, red, moveDistances, blackTurn == maximize, featureWeights);
     else
         if blackTurn
             moveDistances = moveDistances & black;
