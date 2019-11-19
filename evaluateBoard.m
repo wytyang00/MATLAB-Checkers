@@ -1,41 +1,43 @@
-function [heuristicBoardValue] = evaluateBoard(empty, blackNormal, blackKing, black, redNormal, redKing, red, moveDistances, maximizingBlack, weights)
+% Features below are based on the analysis done by Kebin Gregor and Marcus
+% Boeck-Chenevier.
+% (https://github.com/kevingregor/Checkers/blob/master/Final%20Project%20Report.pdf)
+function [heuristicBoardValue] = evaluateBoard(empty, blackNormal, blackKing, black, redNormal, redKing, red, moveDistances, maximizingBlack, blackTurn, weights)
     
     captureMoves = (moveDistances == 2);
-    noAvailableMoves = ~any(moveDistances, 3);
+    
+    middleBlack = black(2:7, 2:7);
+    middleRed   = red(2:7, 2:7);
 
-    captureMoves6by6 = reshape([captureMoves(3:8, 3:8, 1), captureMoves(3:8, 1:6, 2), captureMoves(1:6, 3:8, 3), captureMoves(1:6, 1:6, 4)], [6 6 4]);
+    captureRisk = (captureMoves(3:8, 3:8, 1) | captureMoves(3:8, 1:6, 2) | captureMoves(1:6, 3:8, 3) | captureMoves(1:6, 1:6, 4));
     
     numBlackNormal = sum(blackNormal, 'all');
     numBlackKing = sum(blackKing, 'all');
-    numBlackNormalCaptureMoves = sum(captureMoves6by6 & redNormal(2:7, 2:7), 'all');
-    numBlackKingCaptureMoves = sum(captureMoves6by6 & redKing(2:7, 2:7), 'all');
-    numTrappedBlackNormal = sum(noAvailableMoves & blackNormal, 'all');
-    numTrappedBlackKing = sum(noAvailableMoves & blackKing, 'all');
-    numRunawayBlack = sum(any(blackNormal(2, :) & moveDistances(2, :, 1:2), 3), 'all');
-    numEdgeBlack = sum(black(1, :)) + sum(black(2:8, 1))+ sum(black(2:8, 8)) + sum(black(8, 2:7));
-    blackFeatures = [numBlackNormal, numBlackKing, ...
-                     numBlackNormalCaptureMoves, numBlackKingCaptureMoves, ...
-                     numTrappedBlackNormal, numTrappedBlackKing, ...
-                     numRunawayBlack, numEdgeBlack];
-    blackScore = blackFeatures * weights';
+    numBlackInBackRow = sum(black(8, :), 'all');
+    numBlackInMiddle2by4 = sum(black(4:5, 3:6), 'all');
+    numBlackInMiddle2Sides = sum(black(4:5, [1 2 7 8]), 'all');
+    numBlackRisk = sum(middleBlack & captureRisk, 'all');
+    numBlackProtected = sum(black(1:8, [1 8]), 'all') + sum(black([1 8], 2:7), 'all') + sum(middleBlack & (black(1:6, 1:6) | black(3:8, 3:8)) & (black(1:6, 3:8) | black(3:8, 1:6)), 'all');
     
     numRedNormal = sum(redNormal, 'all');
     numRedKing = sum(redKing, 'all');
-    numRedNormalCaptureMoves = sum(captureMoves6by6 & blackNormal(2:7, 2:7), 'all');
-    numRedKingCaptureMoves = sum(captureMoves6by6 & blackKing(2:7, 2:7), 'all');
-    numTrappedRedNormal = sum(noAvailableMoves & redNormal, 'all');
-    numTrappedRedKing = sum(noAvailableMoves & redKing, 'all');
-    numRunawayRed = sum(any(redNormal(7, :) & moveDistances(7, :, 3:4), 3), 'all');
-    numEdgeRed = sum(red(1, :)) + sum(red(2:8, 1))+ sum(red(2:8, 8)) + sum(red(8, 2:7));
-    redFeatures = [numRedNormal, numRedKing, ...
-                   numRedNormalCaptureMoves, numRedKingCaptureMoves, ...
-                   numTrappedRedNormal, numTrappedRedKing, ...
-                   numRunawayRed, numEdgeRed];
-    redScore = redFeatures * weights';
+    numRedInBackRow = sum(red(1, :), 'all');
+    numRedInMiddle2by4 = sum(red(4:5, 3:6), 'all');
+    numRedInMiddle2Sides = sum(red(4:5, [1 2 7 8]), 'all');
+    numRedRisk = sum(middleRed & captureRisk, 'all');
+    numRedProtected = sum(red(1:8, [1 8]), 'all') + sum(red([1 8], 2:7), 'all') + sum(middleRed & (red(1:6, 1:6) | red(3:8, 3:8)) & (red(1:6, 3:8) | red(3:8, 1:6)), 'all');
+    
+    features = [numBlackNormal, numBlackKing, ...
+                numBlackInBackRow, numBlackInMiddle2by4, ...
+                numBlackInMiddle2Sides, numBlackRisk, ...
+                numBlackProtected, blackTurn, ...
+                numRedNormal, numRedKing, ...
+                numRedInBackRow, numRedInMiddle2by4, ...
+                numRedInMiddle2Sides, numRedRisk, ...
+                numRedProtected, ~blackTurn];
     
     if maximizingBlack
-        heuristicBoardValue = blackScore - redScore;
+        heuristicBoardValue = features * [weights, -weights]';
     else
-        heuristicBoardValue = redScore - blackScore;
+        heuristicBoardValue = features * [-weights, weights]';
     end
 end
