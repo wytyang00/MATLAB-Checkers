@@ -115,7 +115,9 @@ else
     cpuTurn = false;
 end
 
-featureWeights = [1, 2, 0.9, 1.8, -0.2, -0.4, 0.5, 0.2]; % Feature weights used for board evaluation for AI
+% Using feature weights based on the ones from the analysis by Kevin Gregor et al.
+% (https://github.com/kevingregor/Checkers/blob/master/Final%20Project%20Report.pdf)
+featureWeights = [7, 10, 4, 2.5, 0.5, -3, 3, 1]; % Feature weights used for board evaluation for AI
 depth = 6; % Minimax tree search depth for AI (deeper depth requires longer time)
 tolerance = 0; % Tolerance value for alpha-beta window in alphabeta algorithm (higher tolerance costs more time)
 
