@@ -19,7 +19,7 @@ function [value, rowColMove] = checkersAlphabeta(board, bt, rt, bn, rn, bk, rk, 
         end
     elseif depth == 0
         value = evaluateBoard(empty, blackNormal, blackKing, black, ...
-                              redNormal, redKing, red, moveDistances, blackTurn == maximize, featureWeights);
+                              redNormal, redKing, red, moveDistances, blackTurn == maximize, blackTurn, featureWeights);
     else
         if blackTurn
             moveDistances = moveDistances & black;
@@ -43,7 +43,7 @@ function [value, rowColMove] = checkersAlphabeta(board, bt, rt, bn, rn, bk, rk, 
             displacement = directions(directionIdx(i), :);
             newRow = row + distance * displacement(1);
             newCol = col + distance * displacement(2);
-            
+
             newBoard = board;
             if blackTurn && newRow == 1
                 newBoard(newRow, newCol) = bk;
@@ -57,18 +57,18 @@ function [value, rowColMove] = checkersAlphabeta(board, bt, rt, bn, rn, bk, rk, 
                 newBoard(row + displacement(1), col + displacement(2)) = bt;
             end
             
-            empty       = (newBoard == bt) | (newBoard == rt);
-            blackNormal = (newBoard == bn);
-            blackKing   = (newBoard == bk);
-            black       = (blackNormal | blackKing);
-            redNormal   = (newBoard == rn);
-            redKing     = (newBoard == rk);
-            red         = (redNormal | redKing);
-            newMoveDistances = getMoveDistances(empty, blackKing, black, redKing, red);
+            newEmpty       = (newBoard == bt) | (newBoard == rt);
+            newBlackNormal = (newBoard == bn);
+            newBlackKing   = (newBoard == bk);
+            newBlack       = (newBlackNormal | newBlackKing);
+            newRedNormal   = (newBoard == rn);
+            newRedKing     = (newBoard == rk);
+            newRed         = (newRedNormal | newRedKing);
+            newMoveDistances = getMoveDistances(newEmpty, newBlackKing, newBlack, newRedKing, newRed);
             
             alphabetaValue = checkersAlphabeta(newBoard, bt, rt, bn, rn, bk, rk, ...
-                                               empty, blackNormal, blackKing, black, ...
-                                               redNormal, redKing, red, newMoveDistances, ~blackTurn, ...
+                                               newEmpty, newBlackNormal, newBlackKing, newBlack, ...
+                                               newRedNormal, newRedKing, newRed, newMoveDistances, ~blackTurn, ...
                                                depth-1, alpha, beta, tolerance, ~maximize, featureWeights);
             if maximize
                 if (alphabetaValue > value) || (alphabetaValue == value && (randi([0, 1]) || isempty(rowColMove)))
