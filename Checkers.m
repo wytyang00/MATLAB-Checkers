@@ -494,8 +494,8 @@ if blackWin
             winner = [bw, cpu]; % Winner color and name sprite indices
             loser  = [rw, p1]; % Loser color and name sprite indices
         else
-            winner = [rw, p1];
-            loser  = [bw, cpu];
+            winner = [bw, p1];
+            loser  = [rw, cpu];
         end
     else
         winner = [bw, p1];
