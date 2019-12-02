@@ -10,11 +10,11 @@ function [moveDist] = getMoveDistances(empty, blackKing, black, redKing, red)
     blackOrRedKing = (black | redKing);
     redOrBlackKing = (red | blackKing);
     
-    % Pre-allocating shared indices
-    f  = 1:7;
-    fs = 1:6;
-    l  = 2:8;
-    ls = 3:8;
+    % Pre-defining shared indices
+    f  = 1:7; % First 7 indices
+    fs = 1:6; % First 6 indices (shorter)
+    l  = 2:8; % Last 7 indices (shorter)
+    ls = 3:8; % Last 6 indices (shorter)
     
     middleBlack = black(2:7, 2:7);
     middleRed   = red(2:7, 2:7);
